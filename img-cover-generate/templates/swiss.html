@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cover Generator - Swiss Style</title>
+    <style>
+        :root {
+            --bg-color: #EBEBEB;
+            --accent-color: #2F2F2F;
+            --text-color: #1a1a1a;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            background-color: var(--bg-color);
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            color: var(--text-color);
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        /* 瑞士风格布局：左侧信息，右侧（或底部）留白或装饰 */
+        .container {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-rows: 1fr auto;
+            padding: 60px;
+            box-sizing: border-box;
+            border: 20px solid var(--text-color); /* 经典的粗边框 */
+        }
+
+        .content {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding-top: 40px;
+            border-bottom: 4px solid var(--text-color);
+        }
+
+        h1 {
+            font-size: 100px; /* 极度夸张的大标题 */
+            line-height: 0.95;
+            margin: 0;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            text-transform: uppercase;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
+        }
+
+        .subtext {
+            font-size: 32px;
+            margin-top: 40px;
+            font-weight: 500;
+            line-height: 1.4;
+            max-width: 80%;
+            opacity: 0.8;
+            border-left: 8px solid var(--accent-color);
+            padding-left: 24px;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 30px;
+            font-size: 24px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .brand-badge {
+            background: var(--text-color);
+            color: var(--bg-color);
+            padding: 10px 20px;
+            font-weight: bold;
+        }
+
+        /* 装饰性的网格线 */
+        .decoration-grid {
+            position: absolute;
+            bottom: 80px;
+            right: 80px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            opacity: 0.2;
+            z-index: -1;
+        }
+        .dot { width: 10px; height: 10px; background: black; border-radius: 50%; }
+
+        /* Dark mode variant for Swiss can be High Contrast Inverted */
+        .theme-dark {
+            --bg-color: #111;
+            --text-color: #f0f0f0;
+            --accent-color: #ff3b30; /* Red accent for dark mode */
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container">
+        <div class="content">
+            <h1 id="title">SWISS<br>STYLE.</h1>
+            <div class="subtext" id="subtext">International Typographic Style</div>
+        </div>
+        
+        <div class="footer">
+            <div id="date">2026</div> <!-- Dynamic Date placeholder -->
+            <div class="brand-badge" id="footer">KEN STUDIO</div>
+        </div>
+    </div>
+
+    <script>
+        function updateContent(config) {
+            const titleEl = document.getElementById('title');
+            const subtextEl = document.getElementById('subtext');
+            const footerEl = document.getElementById('footer');
+
+            if (config.text) titleEl.innerText = config.text;
+            if (config.subtext) subtextEl.innerText = config.subtext;
+            if (config.footer) footerEl.innerText = config.footer;
+            
+            // Set current year
+            document.getElementById('date').innerText = new Date().getFullYear();
+
+            // --- Smart Font Scaling (Swiss) ---
+            const textLen = config.text ? config.text.length : 0;
+            const subLen = config.subtext ? config.subtext.length : 0;
+
+            // Base size is 100px. Scale down aggressively for Swiss style to keep the "Block" look
+            if (textLen > 6) titleEl.style.fontSize = '80px';
+            if (textLen > 12) titleEl.style.fontSize = '64px';
+            if (textLen > 20) titleEl.style.fontSize = '48px';
+
+            if (subLen > 40) subtextEl.style.fontSize = '24px';
+
+            // --- Landscape Optimization ---
+            // In landscape, the footer might get pushed too far down if we don't adjust
+            const container = document.getElementById('container');
+            if (window.innerWidth > window.innerHeight) {
+                // Reduce top padding in landscape to fit more content
+                container.style.padding = '40px'; 
+                // Adjust grid to give more space to content
+                container.style.gridTemplateRows = '1fr auto';
+            }
+
+            // Color handling
+            // Swiss style prefers solid colors over gradients.
+            // We use the first color as BG, second as Text if provided.
+            const root = document.documentElement;
+
+            if (config.colors && config.colors.length > 0) {
+                // Set background to first color
+                root.style.setProperty('--bg-color', config.colors[0]);
+                
+                // If a second color is provided, use it for accent/text
+                if (config.colors[1]) {
+                    // Simple heuristic: if bg is dark, text should be light, but here we let user control
+                     root.style.setProperty('--accent-color', config.colors[1]);
+                }
+            }
+
+            if (config.textColor) {
+                root.style.setProperty('--text-color', config.textColor);
+            }
+
+            if (config.darkMode) {
+                document.body.classList.add('theme-dark');
+            }
+        }
+    </script>
+</body>
+</html>

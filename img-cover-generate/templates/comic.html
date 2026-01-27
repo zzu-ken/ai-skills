@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cover Generator - Comic Style</title>
+    <style>
+        :root {
+            --bg-color: #fce38a;
+            --card-bg: #ffffff;
+            --border-color: #000000;
+            --shadow-color: #000000;
+            --accent-color: #95e1d3;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg-color);
+            /* 波点背景 */
+            background-image: radial-gradient(var(--border-color) 1px, transparent 1px);
+            background-size: 30px 30px;
+            font-family: "Courier New", Courier, monospace, sans-serif; /* 复古打字机或等宽字体 */
+            overflow: hidden;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 4px solid var(--border-color);
+            /* 实心硬投影 */
+            box-shadow: 12px 12px 0px 0px var(--shadow-color);
+            border-radius: 16px;
+            padding: 60px;
+            width: 75%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+
+        /* 顶部装饰条 */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 80px;
+            height: 20px;
+            background: #ff6b6b;
+            border: 2px solid black;
+            border-radius: 10px;
+        }
+
+        h1 {
+            font-size: 72px;
+            margin: 20px 0;
+            line-height: 1.2;
+            font-weight: 900;
+            color: var(--border-color);
+            /* 标题加个背景色块 */
+            background-color: var(--accent-color);
+            padding: 10px 20px;
+            border: 3px solid var(--border-color);
+            box-shadow: 4px 4px 0 0 var(--border-color);
+            transform: rotate(-2deg); /* 微微倾斜 */
+        }
+
+        .subtext {
+            font-size: 28px;
+            margin-top: 30px;
+            font-weight: 600;
+            color: #333;
+            background: #fff;
+            padding: 10px;
+            border: 2px dashed var(--border-color);
+        }
+
+        .footer {
+            margin-top: 50px;
+            font-size: 18px;
+            font-weight: 700;
+            background: #000;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 4px;
+        }
+
+        /* 搞怪的装饰元素 */
+        .decoration {
+            position: absolute;
+            font-size: 60px;
+        }
+        .d-1 { top: -30px; right: -30px; transform: rotate(15deg); }
+        .d-2 { bottom: -20px; left: -20px; transform: rotate(-10deg); }
+
+        /* Dark mode handles */
+        .theme-dark {
+            --bg-color: #2c3e50;
+            --card-bg: #34495e;
+            --border-color: #ecf0f1;
+            --shadow-color: #1abc9c;
+            --accent-color: #e74c3c;
+        }
+        .theme-dark .subtext { color: #ecf0f1; background: transparent; }
+        .theme-dark .footer { background: #ecf0f1; color: #2c3e50; }
+    </style>
+</head>
+<body>
+    <div class="card" id="card">
+        <h1 id="title">POP ART</h1>
+        <div class="subtext" id="subtext">The brutalist way.</div>
+        <div class="footer" id="footer">@KEN</div>
+
+        <!-- Decor -->
+        <div class="decoration d-1">✨</div>
+        <div class="decoration d-2">🚀</div>
+    </div>
+
+    <script>
+        function updateContent(config) {
+            const titleEl = document.getElementById('title');
+            const subtextEl = document.getElementById('subtext');
+            const footerEl = document.getElementById('footer');
+            const cardEl = document.getElementById('card');
+
+            if (config.text) titleEl.innerText = config.text;
+            if (config.subtext) subtextEl.innerText = config.subtext;
+            if (config.footer) footerEl.innerText = config.footer;
+            
+            // --- Auto Scaling & Landscape Fixes ---
+            const textLen = config.text ? config.text.length : 0;
+            
+            if (textLen > 10) titleEl.style.fontSize = '56px';
+            if (textLen > 20) titleEl.style.fontSize = '42px';
+            
+            // 如果是横屏，减少卡片的上下内边距，给内容腾出空间
+            if (window.innerWidth > window.innerHeight) {
+                cardEl.style.padding = '40px 60px';
+                // 如果文字特别多，甚至可以再小一点
+                if (textLen > 30) cardEl.style.padding = '30px 40px';
+            }
+
+            const root = document.documentElement;
+
+            // Handle colors
+            if (config.colors && config.colors.length > 0) {
+                // Background color
+                root.style.setProperty('--bg-color', config.colors[0]);
+                
+                // Accent color (highlight behind title)
+                if (config.colors[1]) {
+                     root.style.setProperty('--accent-color', config.colors[1]);
+                }
+            }
+            
+            if (config.darkMode) {
+                document.body.classList.add('theme-dark');
+            }
+        }
+    </script>
+</body>
+</html>

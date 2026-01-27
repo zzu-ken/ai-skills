@@ -26,6 +26,7 @@ const argv = yargs(hideBin(process.argv))
     .option('colors', { type: 'string', describe: 'Comma separated colors (e.g. "#ff0000,#0000ff")' })
     .option('gradient', { type: 'string', describe: 'Full css gradient string (overrides colors)' })
     .option('direction', { type: 'string', default: '135deg', describe: 'Gradient direction' })
+    .option('style', { type: 'string', default: 'glass', choices: ['glass', 'swiss', 'comic', 'carbon'], describe: 'Template style' })
     .option('width', { type: 'number', default: 1080, describe: 'Image width' })
     .option('height', { type: 'number', default: 1440, describe: 'Image height (1440 for 3:4, 1920 for 9:16)' })
     .option('output', { type: 'string', default: 'cover.png', describe: 'Output filename' })
@@ -39,7 +40,19 @@ const argv = yargs(hideBin(process.argv))
         process.exit(1);
     }
 
+    // Determine which template to load
+    const styleMap = {
+        'glass': 'glass.html',
+        'swiss': 'swiss.html',
+        'comic': 'comic.html',
+        'carbon': 'carbon.html'
+    };
+    
+    const styleKey = argv.style || 'glass';
+    const templateName = styleMap[styleKey] || 'glass.html';
+
     console.log(`Using browser: ${executablePath}`);
+    console.log(`Using style: ${styleKey} (Template: ${templateName})`);
 
     const browser = await puppeteer.launch({
         executablePath,
@@ -49,37 +62,35 @@ const argv = yargs(hideBin(process.argv))
 
     const page = await browser.newPage();
     
-    // Set viewport
     await page.setViewport({
         width: argv.width,
         height: argv.height,
-        deviceScaleFactor: 2 // High DPI for better quality
+        deviceScaleFactor: 2
     });
 
-    // Load local template
-    const templatePath = path.join(__dirname, 'template.html');
+    const templatePath = path.join(__dirname, 'templates', templateName);
+    if (!fs.existsSync(templatePath)) {
+        console.error(`Error: Template file not found at ${templatePath}`);
+        process.exit(1);
+    }
     await page.goto(`file://${templatePath}`);
 
-    // Prepare config object
     const config = {
         text: argv.text,
         subtext: argv.subtext,
         footer: argv.footer,
-        colors: argv.colors ? argv.colors.split(',') : ['#a18cd1', '#fbc2eb'], // Default pastel gradient
+        colors: argv.colors ? argv.colors.split(',') : null,
         gradient: argv.gradient,
         direction: argv.direction,
         darkMode: argv.dark
     };
 
-    // Inject config into page
     await page.evaluate((cfg) => {
         window.updateContent(cfg);
     }, config);
 
-    // Wait a tiny bit for fonts or rendering adjustments
     await new Promise(r => setTimeout(r, 100));
 
-    // Save screenshot
     const outputPath = path.resolve(process.cwd(), argv.output);
     await page.screenshot({ path: outputPath });
 

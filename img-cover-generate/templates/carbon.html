@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cover Generator - Carbon Style</title>
+    <style>
+        :root {
+            --window-bg: #282c34; /* Atom One Dark */
+            --titlebar-bg: #21252b;
+            --text-color: #abb2bf;
+            --shadow-color: rgba(0,0,0,0.4);
+        }
+
+        /* 引入 Highlight.js 的 Atom One Dark 主题 */
+        @import url('https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css');
+
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Default background, will be overridden by JS */
+            background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+            font-family: "JetBrains Mono", "Fira Code", "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            overflow: hidden;
+        }
+
+        .window-container {
+            width: 85%;
+            max-width: 1100px;
+            border-radius: 12px;
+            background: var(--window-bg);
+            box-shadow: 0 50px 100px -20px var(--shadow-color);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .titlebar {
+            height: 48px;
+            background: var(--titlebar-bg);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            position: relative;
+        }
+
+        .buttons { display: flex; gap: 8px; }
+        .dot { width: 14px; height: 14px; border-radius: 50%; }
+        .red { background: #ff5f56; }
+        .yellow { background: #ffbd2e; }
+        .green { background: #27c93f; }
+
+        .filename {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,0.5);
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .editor {
+            padding: 32px;
+            font-size: 24px;
+            line-height: 1.6;
+            color: var(--text-color);
+            background: var(--window-bg); /* Ensure bg matches theme */
+        }
+        
+        /* Override hljs default padding to fit our layout */
+        .hljs {
+            background: transparent;
+            padding: 0;
+            font-family: inherit;
+        }
+        
+        /* Pre-wrap for long lines */
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 0;
+        }
+
+        /* Light Theme */
+        .theme-light {
+            --window-bg: #fafafa;
+            --titlebar-bg: #e8e8e8;
+            --text-color: #383a42;
+            --shadow-color: rgba(0,0,0,0.2);
+        }
+         .theme-light .window-container { border-color: rgba(0,0,0,0.1); }
+         .theme-light .filename { color: rgba(0,0,0,0.5); }
+         /* Update highlight.js theme for light mode if needed, but keeping dark editor in light mode is also a style choice. 
+            For now, let's keep the editor dark as it's "Carbon" style usually. */
+
+    </style>
+    <!-- 引入 Highlight.js 库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+</head>
+<body>
+    <div class="window-container" id="container">
+        <div class="titlebar">
+            <div class="buttons">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+            </div>
+            <div class="filename" id="filename">untitled.js</div>
+        </div>
+        <div class="editor">
+            <pre><code id="code-content" class="language-javascript">Your code snippet here.</code></pre>
+        </div>
+    </div>
+
+    <script>
+        function updateContent(config) {
+            const codeEl = document.getElementById('code-content');
+            const filenameEl = document.getElementById('filename');
+            
+            // Text is the "code", Subtext is the "filename"
+            if (config.text) {
+                codeEl.textContent = config.text; // Use textContent to prevent XSS and let hljs handle html entities
+                
+                // Remove processed class to allow re-highlighting
+                codeEl.removeAttribute('data-highlighted');
+                
+                // Trigger Highlight.js
+                // It will auto-detect the language based on content
+                hljs.highlightElement(codeEl);
+            }
+            
+            if (config.subtext) filenameEl.innerText = config.subtext;
+
+            // --- Smart Font Scaling ---
+            const textLen = config.text ? config.text.length : 0;
+            if (textLen > 80) codeEl.parentElement.parentElement.style.fontSize = '20px';
+            if (textLen > 150) codeEl.parentElement.parentElement.style.fontSize = '16px';
+
+
+            // Use colors for the background gradient
+            if (config.colors && config.colors.length > 0) {
+                 const direction = config.direction || '135deg';
+                document.body.style.background = `linear-gradient(${direction}, ${config.colors.join(', ')})`;
+            }
+
+            // Light/Dark mode for the window itself
+            // We reuse --dark for this
+            if (config.darkMode) {
+                // Here, --dark means a light editor theme, which is a common alternative.
+                document.body.classList.add('theme-light');
+            }
+        }
+    </script>
+</body>
+</html>

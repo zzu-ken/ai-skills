@@ -165,15 +165,46 @@
     <script>
         function updateContent(config) {
             // Text Content
-            if (config.text) document.getElementById('title').innerText = config.text;
-            if (config.subtext) document.getElementById('subtext').innerText = config.subtext;
-            
+            const titleEl = document.getElementById('title');
+            const subtextEl = document.getElementById('subtext');
             const footerEl = document.getElementById('footer');
+
+            if (config.text) titleEl.innerText = config.text;
+            if (config.subtext) subtextEl.innerText = config.subtext;
+            
             if (config.footer) {
                 footerEl.innerText = config.footer;
                 footerEl.style.display = 'inline-flex';
             } else {
                 footerEl.style.display = 'none';
+            }
+
+            // --- 智能字号缩放逻辑 (Auto-Scale) ---
+            
+            // 1. 主标题缩放
+            if (config.text && config.text.length > 10) {
+                titleEl.style.fontSize = '72px'; // 稍微缩小
+            }
+            if (config.text && config.text.length > 20) {
+                titleEl.style.fontSize = '56px'; // 大幅缩小
+            }
+
+            // 2. 副标题缩放
+            if (config.subtext && config.subtext.length > 30) {
+                subtextEl.style.fontSize = '28px';
+            }
+            if (config.subtext && config.subtext.length > 60) {
+                subtextEl.style.fontSize = '22px';
+                subtextEl.style.lineHeight = '1.3';
+            }
+
+            // --- 横屏布局适配 ---
+            // 如果是横屏 (或者近似正方形)，让卡片更宽，利用横向空间
+            if (window.innerWidth >= window.innerHeight) {
+                const card = document.getElementById('card');
+                card.style.width = '88%'; // 增加宽度
+                card.style.maxWidth = '1200px';
+                card.style.padding = '60px 80px'; // 调整内边距
             }
 
             // Dark Mode
@@ -185,23 +216,14 @@
             const bgLayer = document.getElementById('bgLayer');
             
             if (config.gradient) {
-                // If user provides exact CSS gradient, use it directly (fallback to old style)
                 bgLayer.style.background = config.gradient;
             } else if (config.colors && config.colors.length > 0) {
                 const colors = config.colors;
-                // Pick colors cyclically if not enough provided
                 const c1 = colors[0];
                 const c2 = colors[1] || colors[0];
                 const c3 = colors[2] || colors[0];
 
-                // Create a dynamic mesh gradient
-                // Blob 1: Top Left (Large)
-                // Blob 2: Bottom Right (Large)
-                // Blob 3: Center/Random (Accent)
-                
-                // Determine base color (mix of c1 and c2)
                 bgLayer.style.backgroundColor = c2; 
-                
                 bgLayer.style.background = `
                     radial-gradient(at 10% 10%, ${c1} 0%, transparent 70%),
                     radial-gradient(at 90% 90%, ${c2} 0%, transparent 70%),
