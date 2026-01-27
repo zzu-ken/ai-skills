@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cover Generator Pro</title>
+    <style>
+        :root {
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --glass-bg: rgba(255, 255, 255, 0.15);
+            --text-color: #111;
+            --subtext-color: rgba(0,0,0, 0.65);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0; /* Fallback */
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 1. 噪点纹理层 (Noise Texture) - 增加质感 */
+        .noise-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+            opacity: 0.06;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* 2. 流体背景层 (Mesh Gradient Background) */
+        .background-blobs {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            /* 默认背景，会被 JS 覆盖 */
+            background: radial-gradient(circle at 10% 20%, rgb(255, 154, 158) 0%, transparent 50%),
+                        radial-gradient(circle at 90% 80%, rgb(254, 207, 239) 0%, transparent 50%),
+                        radial-gradient(circle at 50% 50%, rgb(255, 255, 255) 0%, transparent 100%);
+            background-color: #fecfef;
+            transition: all 0.5s ease;
+        }
+
+        /* 3. 卡片容器 */
+        .card {
+            position: relative;
+            z-index: 10;
+            background: var(--glass-bg);
+            backdrop-filter: blur(40px) saturate(120%);
+            -webkit-backdrop-filter: blur(40px) saturate(120%);
+            border-radius: 48px;
+            /* 细腻的内阴影和高光边框 */
+            box-shadow: 
+                0 20px 40px -10px rgba(0, 0, 0, 0.1),
+                inset 0 0 0 1px var(--glass-border),
+                inset 0 1px 2px 0 rgba(255, 255, 255, 0.4);
+            
+            padding: 80px 60px;
+            width: 82%;
+            max-width: 960px;
+            
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start; /* 左对齐通常更有现代感 */
+            text-align: left;
+        }
+
+        /* 标题设计 */
+        h1 {
+            font-size: 96px;
+            margin: 0;
+            line-height: 1.05;
+            font-weight: 800;
+            letter-spacing: -0.03em; /* 紧凑字距 */
+            color: var(--text-color);
+            word-wrap: break-word;
+            width: 100%;
+            
+            /* 微妙的文字渐变感 (可选) */
+            /* background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 100%); */
+            /* -webkit-background-clip: text; */
+            /* -webkit-text-fill-color: transparent; */
+        }
+
+        .subtext {
+            font-size: 36px;
+            margin-top: 32px;
+            font-weight: 500;
+            letter-spacing: -0.01em;
+            line-height: 1.4;
+            color: var(--subtext-color);
+            max-width: 90%;
+        }
+
+        .footer {
+            margin-top: 60px;
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 24px;
+            border-radius: 100px;
+            background: rgba(255,255,255, 0.3);
+            border: 1px solid rgba(255,255,255, 0.4);
+            
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        /* 深色模式 */
+        .theme-dark {
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --glass-bg: rgba(0, 0, 0, 0.4);
+            --text-color: #ffffff;
+            --subtext-color: rgba(255,255,255, 0.7);
+        }
+        
+        .theme-dark .footer {
+            background: rgba(255,255,255, 0.1);
+            border-color: rgba(255,255,255, 0.1);
+        }
+
+        /* 装饰元素：角落的光晕 */
+        .card::after {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(40px);
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-blobs" id="bgLayer"></div>
+    <div class="noise-overlay"></div>
+
+    <div class="card" id="card">
+        <h1 id="title">Better Design</h1>
+        <div class="subtext" id="subtext">Auto-generated with style</div>
+        <div class="footer" id="footer">KEN STUDIO</div>
+    </div>
+
+    <script>
+        function updateContent(config) {
+            // Text Content
+            if (config.text) document.getElementById('title').innerText = config.text;
+            if (config.subtext) document.getElementById('subtext').innerText = config.subtext;
+            
+            const footerEl = document.getElementById('footer');
+            if (config.footer) {
+                footerEl.innerText = config.footer;
+                footerEl.style.display = 'inline-flex';
+            } else {
+                footerEl.style.display = 'none';
+            }
+
+            // Dark Mode
+            if (config.darkMode) {
+                document.body.classList.add('theme-dark');
+            }
+
+            // Advanced Mesh Gradient Generation
+            const bgLayer = document.getElementById('bgLayer');
+            
+            if (config.gradient) {
+                // If user provides exact CSS gradient, use it directly (fallback to old style)
+                bgLayer.style.background = config.gradient;
+            } else if (config.colors && config.colors.length > 0) {
+                const colors = config.colors;
+                // Pick colors cyclically if not enough provided
+                const c1 = colors[0];
+                const c2 = colors[1] || colors[0];
+                const c3 = colors[2] || colors[0];
+
+                // Create a dynamic mesh gradient
+                // Blob 1: Top Left (Large)
+                // Blob 2: Bottom Right (Large)
+                // Blob 3: Center/Random (Accent)
+                
+                // Determine base color (mix of c1 and c2)
+                bgLayer.style.backgroundColor = c2; 
+                
+                bgLayer.style.background = `
+                    radial-gradient(at 10% 10%, ${c1} 0%, transparent 70%),
+                    radial-gradient(at 90% 90%, ${c2} 0%, transparent 70%),
+                    radial-gradient(at 50% 50%, ${c3} 0%, transparent 60%)
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
