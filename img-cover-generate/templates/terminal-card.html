@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cover Generator - Terminal Card Style</title>
+    <style>
+        :root {
+            --window-bg: #1e1e2e;
+            --titlebar-bg: #181825;
+            --card-bg: #313244;
+            --accent-color: #89b4fa;
+            --button-color: var(--accent-color);
+            --text-primary: #cdd6f4;
+            --text-secondary: #a6adc8;
+            --shadow-color: rgba(0,0,0,0.5);
+            --font-display: "Clash Display", system-ui, -apple-system, sans-serif;
+            --font-body: "Satoshi", system-ui, -apple-system, sans-serif;
+            --font-mono: "SF Mono", "Fira Code", "JetBrains Mono", "Cascadia Code", monospace;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #89b4fa 0%, #74c7ec 100%);
+            font-family: var(--font-mono);
+            overflow: hidden;
+        }
+
+        .window-container {
+            width: 85%;
+            max-width: 1100px;
+            border-radius: 16px;
+            background: var(--window-bg);
+            box-shadow:
+                0 50px 100px -20px var(--shadow-color),
+                0 30px 60px -30px var(--shadow-color),
+                inset 0 1px 0 rgba(255,255,255,0.1);
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .titlebar {
+            height: clamp(44px, 7vh, 56px);
+            background: linear-gradient(180deg, rgba(137, 180, 250, 0.15) 0%, rgba(137, 180, 250, 0.05) 100%);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            position: relative;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+
+        .buttons {
+            display: flex;
+            gap: clamp(6px, 1.5vw, 10px);
+        }
+
+        .dot {
+            width: clamp(12px, 2vh, 16px);
+            height: clamp(12px, 2vh, 16px);
+            border-radius: 50%;
+            box-shadow: inset 0 -1px 2px rgba(0,0,0,0.3);
+        }
+
+        .red {
+            background: linear-gradient(180deg, #ff5f57 0%, #e33e32 100%);
+        }
+
+        .yellow {
+            background: linear-gradient(180deg, #ffbd2e 0%, #e5a000 100%);
+        }
+
+        .green {
+            background: linear-gradient(180deg, #28c840 0%, #1aab29 100%);
+        }
+
+        .filename {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--accent-color);
+            font-size: clamp(12px, 2vh, 15px);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 20px rgba(137, 180, 250, 0.5);
+            font-family: var(--font-mono);
+        }
+
+        .content-area {
+            padding: clamp(20px, 5vh, 48px) clamp(24px, 4vw, 40px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: clamp(180px, 35vh, 400px);
+            background: var(--window-bg);
+        }
+
+        .card {
+            background: transparent;
+            border-radius: 20px;
+            padding: clamp(24px, 4vh, 48px) clamp(32px, 5vw, 56px);
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+            border: none;
+            transition: transform 0.3s ease;
+        }
+
+        .emoji-icon {
+            font-size: clamp(40px, 7vh, 64px);
+            margin-bottom: clamp(12px, 2vh, 24px);
+            display: block;
+        }
+
+        .title {
+            font-size: clamp(28px, 5.5vh, 52px);
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 clamp(10px, 2vh, 20px) 0;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+            font-family: var(--font-mono);
+        }
+
+        .subtitle {
+            font-size: clamp(16px, 3vh, 28px);
+            color: var(--text-secondary);
+            margin: 0 0 clamp(16px, 3vh, 36px) 0;
+            line-height: 1.4;
+            font-weight: 400;
+            font-family: var(--font-mono);
+        }
+
+        .button-group {
+            display: flex;
+            gap: clamp(8px, 2vw, 16px);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: clamp(6px, 1vw, 10px);
+            padding: clamp(10px, 2vh, 16px) clamp(20px, 3vw, 32px);
+            border-radius: 12px;
+            font-size: clamp(14px, 2.5vh, 20px);
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+                rgba(255, 255, 255, 0.3) 0%,
+                transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .btn:hover::before {
+            opacity: 1;
+        }
+
+        .btn-primary {
+            background: var(--button-gradient, linear-gradient(135deg, #89b4fa, #74c7ec, #89dceb));
+            background-size: 200% 200%;
+            color: #1e1e2e;
+            box-shadow:
+                0 8px 32px 0 rgba(137, 180, 250, 0.4),
+                0 2px 8px 0 rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            animation: gradient-shift 4s ease infinite;
+            transform: translateY(0);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 12px 40px 0 rgba(137, 180, 250, 0.5),
+                0 4px 12px 0 rgba(0, 0, 0, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        @keyframes gradient-shift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-primary);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .button-group:has(:only-child) {
+            justify-content: center;
+        }
+
+        .tag-list {
+            display: flex;
+            gap: clamp(6px, 1.5vw, 10px);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: clamp(16px, 3vh, 32px);
+        }
+
+        .tag {
+            background: transparent;
+            color: var(--tag-text-color, rgba(205, 214, 244, 0.6));
+            padding: 0;
+            font-size: clamp(12px, 2vh, 16px);
+            font-weight: 400;
+            border: none;
+            font-family: var(--font-mono);
+            letter-spacing: 0.5px;
+        }
+
+        /* Footer brand */
+        .footer {
+            margin-top: clamp(16px, 3vh, 36px);
+            font-size: clamp(12px, 2.2vh, 18px);
+            color: rgba(255,255,255,0.3);
+            font-weight: 500;
+            letter-spacing: 1px;
+            font-family: var(--font-mono);
+        }
+
+        /* Responsive font scaling */
+        .title.long-text {
+            font-size: 42px;
+        }
+
+        .title.very-long-text {
+            font-size: 36px;
+        }
+
+        .subtitle.long-text {
+            font-size: 24px;
+        }
+
+        /* Light mode variant */
+        body.theme-light {
+            --window-bg: #eff1f5;
+            --titlebar-bg: #e6e9ef;
+            --card-bg: #ffffff;
+            --accent-color: #1e66f5;
+            --text-primary: #4c4f69;
+            --text-secondary: #6c6f85;
+            --shadow-color: rgba(0,0,0,0.15);
+        }
+
+        body.theme-light .window-container {
+            border-color: rgba(0,0,0,0.1);
+        }
+
+        body.theme-light .filename {
+            color: rgba(0,0,0,0.4);
+        }
+
+        body.theme-light .tag {
+            background: transparent;
+            color: var(--tag-text-color, rgba(76, 79, 105, 0.5));
+            border: none;
+        }
+
+        body.theme-light .titlebar {
+            background: linear-gradient(180deg, rgba(30, 102, 245, 0.12) 0%, rgba(30, 102, 245, 0.04) 100%);
+        }
+
+        /* Compact mode for wide aspect ratios (16:9, etc.) */
+        body.compact-mode .titlebar {
+            height: clamp(28px, 3.8vh, 36px);
+            padding: 0 14px;
+        }
+
+        body.compact-mode .content-area {
+            padding: clamp(6px, 1.2vh, 14px) clamp(18px, 2.8vw, 28px);
+            min-height: clamp(120px, 20vh, 160px);
+        }
+
+        body.compact-mode .card {
+            padding: clamp(8px, 1.5vh, 18px) clamp(20px, 3vw, 32px);
+        }
+
+        body.compact-mode .emoji-icon {
+            font-size: clamp(20px, 3.2vh, 32px);
+            margin-bottom: clamp(2px, 0.5vh, 6px);
+        }
+
+        body.compact-mode .title {
+            font-size: clamp(16px, 2.6vh, 32px);
+            margin-bottom: clamp(3px, 0.6vh, 8px);
+            font-family: var(--font-mono);
+        }
+
+        body.compact-mode .subtitle {
+            font-size: clamp(10px, 1.6vh, 16px);
+            margin-bottom: clamp(6px, 1.2vh, 12px);
+            font-family: var(--font-mono);
+        }
+
+        body.compact-mode .btn {
+            padding: clamp(5px, 0.9vh, 9px) clamp(10px, 1.6vw, 18px);
+            font-size: clamp(9px, 1.4vh, 13px);
+            font-family: var(--font-mono);
+        }
+
+        body.compact-mode .tag-list {
+            margin-top: clamp(6px, 1.2vh, 12px);
+        }
+
+        body.compact-mode .footer {
+            margin-top: clamp(6px, 1.2vh, 12px);
+            font-size: clamp(8px, 1.4vh, 11px);
+        }
+
+        body.compact-mode .window-container {
+            border-radius: 8px;
+        }
+
+        body.compact-mode .dot {
+            width: clamp(9px, 1.4vh, 12px);
+            height: clamp(9px, 1.4vh, 12px);
+        }
+
+        body.compact-mode .filename {
+            font-size: clamp(9px, 1.4vh, 12px);
+        }
+    </style>
+</head>
+<body>
+    <div class="window-container" id="container">
+        <div class="titlebar">
+            <div class="buttons">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+            </div>
+            <div class="filename" id="filename">terminal-card</div>
+        </div>
+        <div class="content-area">
+            <div class="card">
+                <span class="emoji-icon" id="emoji">🚀</span>
+                <h1 class="title" id="title">Your Title Here</h1>
+                <p class="subtitle" id="subtitle">Your subtitle or description goes here</p>
+
+                <div class="button-group" id="buttonGroup">
+                    <button class="btn btn-primary" id="btn1">Get Started</button>
+                </div>
+
+                <div class="tag-list" id="tagList" style="display: none;">
+                    <span class="tag">Tag 1</span>
+                    <span class="tag">Tag 2</span>
+                    <span class="tag">Tag 3</span>
+                </div>
+
+                <div class="footer" id="footer" style="display: none;">@YOURBRAND</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Color utility functions
+        const ColorUtils = {
+            // Parse color to RGB
+            parseColor(color) {
+                const ctx = document.createElement('canvas').getContext('2d');
+                ctx.fillStyle = color;
+                const temp = ctx.fillStyle;
+                const match = temp.match(/^#([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})$/);
+                if (match) {
+                    return {
+                        r: parseInt(match[1], 16),
+                        g: parseInt(match[2], 16),
+                        b: parseInt(match[3], 16)
+                    };
+                }
+                // Handle rgb/rgba format
+                const rgbMatch = temp.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+                if (rgbMatch) {
+                    return {
+                        r: parseInt(rgbMatch[1]),
+                        g: parseInt(rgbMatch[2]),
+                        b: parseInt(rgbMatch[3])
+                    };
+                }
+                return null;
+            },
+
+            // Calculate brightness (0-255)
+            getBrightness(rgb) {
+                return (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
+            },
+
+            // Darken a color by percentage
+            darken(color, percent) {
+                const rgb = this.parseColor(color);
+                if (!rgb) return color;
+                const factor = 1 - percent;
+                return `rgb(${Math.round(rgb.r * factor)}, ${Math.round(rgb.g * factor)}, ${Math.round(rgb.b * factor)})`;
+            },
+
+            // Lighten a color by percentage
+            lighten(color, percent) {
+                const rgb = this.parseColor(color);
+                if (!rgb) return color;
+                const factor = 1 + percent;
+                return `rgb(${Math.min(255, Math.round(rgb.r * factor))}, ${Math.min(255, Math.round(rgb.g * factor))}, ${Math.min(255, Math.round(rgb.b * factor))})`;
+            },
+
+            // Convert to hex
+            toHex(rgb) {
+                return '#' + [rgb.r, rgb.g, rgb.b].map(x => {
+                    const hex = x.toString(16);
+                    return hex.length === 1 ? '0' + hex : hex;
+                }).join('');
+            },
+
+            // Generate complementary color
+            getComplementary(color) {
+                const rgb = this.parseColor(color);
+                if (!rgb) return color;
+                return this.toHex({
+                    r: 255 - rgb.r,
+                    g: 255 - rgb.g,
+                    b: 255 - rgb.b
+                });
+            },
+
+            // Generate gradient colors
+            generateGradient(baseColor, count = 3) {
+                const rgb = this.parseColor(baseColor);
+                if (!rgb) return [baseColor];
+
+                const colors = [];
+                for (let i = 0; i < count; i++) {
+                    const factor = 0.7 + (i / (count - 1)) * 0.6; // 0.7 to 1.3
+                    colors.push(`rgb(${Math.min(255, Math.round(rgb.r * factor))}, ${Math.min(255, Math.round(rgb.g * factor))}, ${Math.min(255, Math.round(rgb.b * factor))})`);
+                }
+                return colors;
+            },
+
+            // Check if color is dark
+            isDark(color) {
+                const rgb = this.parseColor(color);
+                if (!rgb) return false;
+                return this.getBrightness(rgb) < 128;
+            }
+        };
+
+        function updateContent(config) {
+            const titleEl = document.getElementById('title');
+            const subtitleEl = document.getElementById('subtitle');
+            const footerEl = document.getElementById('footer');
+            const filenameEl = document.getElementById('filename');
+            const emojiEl = document.getElementById('emoji');
+            const btn1El = document.getElementById('btn1');
+            const buttonGroupEl = document.getElementById('buttonGroup');
+            const tagListEl = document.getElementById('tagList');
+
+            // Detect aspect ratio for responsive adjustments
+            const aspectRatio = window.innerWidth / window.innerHeight;
+            const isWideRatio = aspectRatio > 1.3;
+            const isShortHeight = window.innerHeight < 500;
+
+            // Apply compact mode for wide ratios or short height
+            if (isWideRatio || isShortHeight) {
+                document.body.classList.add('compact-mode');
+            }
+
+            // Process background colors and generate dynamic palette
+            let primaryBgColor = null;
+            if (config.colors && config.colors.length > 0) {
+                const direction = config.direction || '135deg';
+                document.body.style.background = `linear-gradient(${direction}, ${config.colors.join(', ')})`;
+
+                // Use first color as primary for calculations
+                primaryBgColor = config.colors[0];
+
+                // Auto-calculate accent color if not provided
+                if (!config.accentColor) {
+                    const isBgDark = ColorUtils.isDark(primaryBgColor);
+                    // If background is dark, use lighter accent; if light, use darker
+                    const autoAccent = isBgDark
+                        ? ColorUtils.lighten(primaryBgColor, 0.4)
+                        : ColorUtils.darken(primaryBgColor, 0.2);
+                    document.documentElement.style.setProperty('--accent-color', autoAccent);
+                }
+
+                // Tags now use transparent background with dynamic text color
+                document.documentElement.style.setProperty('--tag-bg', 'transparent');
+                document.documentElement.style.setProperty('--tag-border', 'transparent');
+
+                // Calculate tag text color based on background brightness
+                const isBgDark = ColorUtils.isDark(primaryBgColor);
+                // For dark backgrounds: use light semi-transparent text
+                // For light backgrounds: use dark semi-transparent text
+                let tagTextColor;
+                if (isBgDark) {
+                    // Extract RGB from primary color and create a light, semi-transparent version
+                    const bgRgb = ColorUtils.parseColor(primaryBgColor);
+                    tagTextColor = `rgba(${Math.min(255, bgRgb.r + 80)}, ${Math.min(255, bgRgb.g + 80)}, ${Math.min(255, bgRgb.b + 80)}, 0.6)`;
+                } else {
+                    // For light backgrounds, use dark text
+                    const bgRgb = ColorUtils.parseColor(primaryBgColor);
+                    const brightness = ColorUtils.getBrightness(bgRgb);
+                    if (brightness > 220) {
+                        // Very light background - use dark gray
+                        tagTextColor = 'rgba(76, 79, 105, 0.5)';
+                    } else {
+                        // Medium light background - darken the background color
+                        tagTextColor = `rgba(${Math.max(0, bgRgb.r - 60)}, ${Math.max(0, bgRgb.g - 60)}, ${Math.max(0, bgRgb.b - 60)}, 0.7)`;
+                    }
+                }
+                document.documentElement.style.setProperty('--tag-text-color', tagTextColor);
+
+                // Generate button gradient and glow
+                let gradientColors;
+                if (config.colors && config.colors.length >= 3) {
+                    // Use the background gradient colors for button
+                    gradientColors = config.colors.slice(0, 3);
+                } else if (config.colors && config.colors.length === 2) {
+                    // With 2 colors, generate a middle one
+                    gradientColors = [
+                        config.colors[0],
+                        ColorUtils.lighten(config.colors[0], 0.15),
+                        config.colors[1]
+                    ];
+                } else {
+                    // Single color - auto generate gradient
+                    gradientColors = ColorUtils.generateGradient(primaryBgColor, 3);
+                }
+                const buttonGradient = `linear-gradient(135deg, ${gradientColors.join(', ')})`;
+                document.documentElement.style.setProperty('--button-gradient', buttonGradient);
+
+                // Calculate button glow color using the middle gradient color
+                const middleGradientColor = gradientColors[Math.floor(gradientColors.length / 2)];
+                const glowRgb = ColorUtils.parseColor(middleGradientColor);
+                const glowColor = ColorUtils.isDark(primaryBgColor)
+                    ? `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, 0.5)`
+                    : `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, 0.4)`;
+                document.documentElement.style.setProperty('--button-glow-color', glowColor);
+
+                // Calculate button text color (contrast)
+                const buttonBgBrightness = ColorUtils.getBrightness(ColorUtils.parseColor(gradientColors[1]));
+                const buttonTextColor = buttonBgBrightness > 128 ? '#1e1e2e' : '#ffffff';
+                document.documentElement.style.setProperty('--button-text-color', buttonTextColor);
+            }
+
+            // Custom accent color (override auto-calculated)
+            if (config.accentColor) {
+                document.documentElement.style.setProperty('--accent-color', config.accentColor);
+            }
+
+            // Custom button color (override auto-calculated gradient)
+            if (config.buttonColor) {
+                const gradientColors = ColorUtils.generateGradient(config.buttonColor, 3);
+                const buttonGradient = `linear-gradient(135deg, ${gradientColors.join(', ')})`;
+                document.documentElement.style.setProperty('--button-gradient', buttonGradient);
+
+                const middleGradientColor = gradientColors[Math.floor(gradientColors.length / 2)];
+                const glowRgb = ColorUtils.parseColor(middleGradientColor);
+                const glowColor = ColorUtils.isDark(config.buttonColor)
+                    ? `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, 0.5)`
+                    : `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, 0.4)`;
+                document.documentElement.style.setProperty('--button-glow-color', glowColor);
+            }
+
+            // Main title
+            if (config.text) {
+                titleEl.textContent = config.text;
+                titleEl.classList.remove('long-text', 'very-long-text');
+                const threshold = isWideRatio ? 20 : 30;
+                const longThreshold = isWideRatio ? 35 : 50;
+                if (config.text.length > threshold) titleEl.classList.add('long-text');
+                if (config.text.length > longThreshold) titleEl.classList.add('very-long-text');
+            }
+
+            // Subtitle
+            if (config.subtext) {
+                subtitleEl.textContent = config.subtext;
+                subtitleEl.classList.remove('long-text');
+                const subtitleThreshold = isWideRatio ? 35 : 50;
+                if (config.subtext.length > subtitleThreshold) subtitleEl.classList.add('long-text');
+            } else {
+                subtitleEl.style.display = 'none';
+            }
+
+            // Footer/Brand
+            if (config.footer) {
+                footerEl.textContent = config.footer;
+                footerEl.style.display = 'block';
+            }
+
+            // Filename in titlebar
+            if (config.filename) {
+                filenameEl.textContent = config.filename;
+            }
+
+            // Emoji icon
+            if (config.emoji) {
+                emojiEl.textContent = config.emoji;
+                emojiEl.style.display = 'block';
+            } else {
+                emojiEl.style.display = 'none';
+            }
+
+            // Primary button
+            if (config.button1) {
+                btn1El.textContent = config.button1;
+            } else {
+                buttonGroupEl.style.display = 'none';
+            }
+
+            // Tags (comma-separated)
+            if (config.tags) {
+                const tags = config.tags.split(',').map(t => t.trim());
+                tagListEl.innerHTML = tags.map(tag => `<span class="tag">${tag}</span>`).join('');
+                tagListEl.style.display = 'flex';
+            }
+
+            // Light/Dark mode
+            if (config.darkMode) {
+                document.body.classList.add('theme-light');
+            }
+
+            // Add button hover effect
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.addEventListener('mousemove', (e) => {
+                    const rect = btn.getBoundingClientRect();
+                    const x = ((e.clientX - rect.left) / rect.width) * 100;
+                    const y = ((e.clientY - rect.top) / rect.height) * 100;
+                    btn.style.setProperty('--mouse-x', `${x}%`);
+                    btn.style.setProperty('--mouse-y', `${y}%`);
+                });
+            });
+        }
+    </script>
+</body>
+</html>

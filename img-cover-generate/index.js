@@ -26,11 +26,18 @@ const argv = yargs(hideBin(process.argv))
     .option('colors', { type: 'string', describe: 'Comma separated colors (e.g. "#ff0000,#0000ff")' })
     .option('gradient', { type: 'string', describe: 'Full css gradient string (overrides colors)' })
     .option('direction', { type: 'string', default: '135deg', describe: 'Gradient direction' })
-    .option('style', { type: 'string', default: 'glass', choices: ['glass', 'swiss', 'comic', 'carbon'], describe: 'Template style' })
+    .option('style', { type: 'string', default: 'glass', choices: ['glass', 'swiss', 'comic', 'carbon', 'terminal-card'], describe: 'Template style' })
     .option('width', { type: 'number', default: 1080, describe: 'Image width' })
     .option('height', { type: 'number', default: 1440, describe: 'Image height (1440 for 3:4, 1920 for 9:16)' })
     .option('output', { type: 'string', default: 'cover.png', describe: 'Output filename' })
     .option('dark', { type: 'boolean', default: false, describe: 'Use dark card theme' })
+    // Terminal-card specific options
+    .option('emoji', { type: 'string', describe: 'Emoji icon for terminal-card style' })
+    .option('button', { type: 'string', describe: 'Button text (terminal-card)' })
+    .option('buttonColor', { type: 'string', describe: 'Button background color (terminal-card)' })
+    .option('tags', { type: 'string', describe: 'Comma-separated tags (terminal-card)' })
+    .option('filename', { type: 'string', describe: 'Titlebar filename (terminal-card)' })
+    .option('accentColor', { type: 'string', describe: 'Custom accent color (terminal-card)' })
     .argv;
 
 (async () => {
@@ -45,7 +52,8 @@ const argv = yargs(hideBin(process.argv))
         'glass': 'glass.html',
         'swiss': 'swiss.html',
         'comic': 'comic.html',
-        'carbon': 'carbon.html'
+        'carbon': 'carbon.html',
+        'terminal-card': 'terminal-card.html'
     };
     
     const styleKey = argv.style || 'glass';
@@ -82,7 +90,14 @@ const argv = yargs(hideBin(process.argv))
         colors: argv.colors ? argv.colors.split(',') : null,
         gradient: argv.gradient,
         direction: argv.direction,
-        darkMode: argv.dark
+        darkMode: argv.dark,
+        // Terminal-card specific
+        emoji: argv.emoji,
+        button1: argv.button,
+        buttonColor: argv.buttonColor,
+        tags: argv.tags,
+        filename: argv.filename,
+        accentColor: argv.accentColor
     };
 
     await page.evaluate((cfg) => {
