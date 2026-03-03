@@ -126,25 +126,65 @@ discover_target_tools() {
   else
     # Auto-discover mode - check known locations
     # Use stderr for log messages, stdout only for paths
-    if [ -d "$HOME/.claude/skills" ]; then
-      targets+=("$HOME/.claude/skills")
-      echo "📦 发现目标: claude → $HOME/.claude/skills" >&2
+
+    # Claude Code: ~/.claude/skills
+    local claude_root="$HOME/.claude"
+    if [ -d "$claude_root" ]; then
+      local claude_skills="$claude_root/skills"
+      if [ ! -d "$claude_skills" ]; then
+        echo "📦 创建缺失目录: $claude_skills" >&2
+        mkdir -p "$claude_skills"
+      fi
+      targets+=("$claude_skills")
+      echo "📦 发现目标: claude → $claude_skills" >&2
     fi
-    if [ -d "$HOME/.config/opencode/skills" ]; then
-      targets+=("$HOME/.config/opencode/skills")
-      echo "📦 发现目标: opencode → $HOME/.config/opencode/skills" >&2
+
+    # OpenCode: ~/.config/opencode/skills
+    local opencode_root="$HOME/.config/opencode"
+    if [ -d "$opencode_root" ]; then
+      local opencode_skills="$opencode_root/skills"
+      if [ ! -d "$opencode_skills" ]; then
+        echo "📦 创建缺失目录: $opencode_skills" >&2
+        mkdir -p "$opencode_skills"
+      fi
+      targets+=("$opencode_skills")
+      echo "📦 发现目标: opencode → $opencode_skills" >&2
     fi
-    if [ -d "$HOME/.cursor/skills" ]; then
-      targets+=("$HOME/.cursor/skills")
-      echo "📦 发现目标: cursor → $HOME/.cursor/skills" >&2
+
+    # Cursor: ~/.cursor/skills
+    local cursor_root="$HOME/.cursor"
+    if [ -d "$cursor_root" ]; then
+      local cursor_skills="$cursor_root/skills"
+      if [ ! -d "$cursor_skills" ]; then
+        echo "📦 创建缺失目录: $cursor_skills" >&2
+        mkdir -p "$cursor_skills"
+      fi
+      targets+=("$cursor_skills")
+      echo "📦 发现目标: cursor → $cursor_skills" >&2
     fi
-    if [ -d "$HOME/.openclaw/skills" ]; then
-      targets+=("$HOME/.openclaw/skills")
-      echo "📦 发现目标: openclaw → $HOME/.openclaw/skills" >&2
+
+    # OpenClaw: ~/.openclaw/skills
+    local openclaw_root="$HOME/.openclaw"
+    if [ -d "$openclaw_root" ]; then
+      local openclaw_skills="$openclaw_root/skills"
+      if [ ! -d "$openclaw_skills" ]; then
+        echo "📦 创建缺失目录: $openclaw_skills" >&2
+        mkdir -p "$openclaw_skills"
+      fi
+      targets+=("$openclaw_skills")
+      echo "📦 发现目标: openclaw → $openclaw_skills" >&2
     fi
-    if [ -d "$HOME/.codex/skills" ]; then
-      targets+=("$HOME/.codex/skills")
-      echo "📦 发现目标: codex → $HOME/.codex/skills" >&2
+
+    # Codex: ~/.codex/skills
+    local codex_root="$HOME/.codex"
+    if [ -d "$codex_root" ]; then
+      local codex_skills="$codex_root/skills"
+      if [ ! -d "$codex_skills" ]; then
+        echo "📦 创建缺失目录: $codex_skills" >&2
+        mkdir -p "$codex_skills"
+      fi
+      targets+=("$codex_skills")
+      echo "📦 发现目标: codex → $codex_skills" >&2
     fi
   fi
 
