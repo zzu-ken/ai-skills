@@ -116,7 +116,6 @@ discover_target_tools() {
   local targets=()
 
   if [ -n "$TARGET_DIR" ]; then
-    # Single target mode
     if [ ! -d "$TARGET_DIR" ]; then
       log_error "Target directory does not exist: $TARGET_DIR"
       exit 1
@@ -124,28 +123,35 @@ discover_target_tools() {
     targets+=("$TARGET_DIR")
     echo "📦 目标: $TARGET_DIR" >&2
   else
-    # Auto-discover mode - check known locations
-    # Use stderr for log messages, stdout only for paths
-    if [ -d "$HOME/.claude/skills" ]; then
-      targets+=("$HOME/.claude/skills")
-      echo "📦 发现目标: claude → $HOME/.claude/skills" >&2
-    fi
-    if [ -d "$HOME/.config/opencode/skills" ]; then
-      targets+=("$HOME/.config/opencode/skills")
-      echo "📦 发现目标: opencode → $HOME/.config/opencode/skills" >&2
-    fi
-    if [ -d "$HOME/.cursor/skills" ]; then
-      targets+=("$HOME/.cursor/skills")
-      echo "📦 发现目标: cursor → $HOME/.cursor/skills" >&2
-    fi
-    if [ -d "$HOME/.openclaw/skills" ]; then
-      targets+=("$HOME/.openclaw/skills")
-      echo "📦 发现目标: openclaw → $HOME/.openclaw/skills" >&2
-    fi
-    if [ -d "$HOME/.codex/skills" ]; then
-      targets+=("$HOME/.codex/skills")
-      echo "📦 发现目标: codex → $HOME/.codex/skills" >&2
-    fi
+    local tool_paths=(
+      "$HOME/.claude/skills"
+      "$HOME/.config/opencode/skills"
+      "$HOME/.cursor/skills"
+      "$HOME/.openclaw/skills"
+      "$HOME/.codex/skills"
+    )
+
+    for skills_path in "${tool_paths[@]}"; do
+      local base_dir
+      base_dir=$(dirname "$skills_path")
+      local tool_name
+      tool_name=$(basename "$base_dir")
+
+      if [ -d "$base_dir" ]; then
+        if [ -d "$skills_path" ]; then
+          targets+=("$skills_path")
+          echo "📦 发现目标: $tool_name → $skills_path" >&2
+        else
+          echo "📦 自动创建: $tool_name → $skills_path" >&2
+          if [ "$DRY_RUN" = false ]; then
+            mkdir -p "$skills_path"
+          else
+            echo "  (dry-run: would create directory)" >&2
+          fi
+          targets+=("$skills_path")
+        fi
+      fi
+    done
   fi
 
   if [ ${#targets[@]} -eq 0 ]; then
