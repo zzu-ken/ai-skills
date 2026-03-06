@@ -1,0 +1,4 @@
+interface:
+  display_name: "微信推文写手"
+  short_description: "Multi-agent workflow for WeChat articles"
+  default_prompt: "Use $wechat-article-writer to rewrite an article or generate a WeChat article from a topic."
