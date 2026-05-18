@@ -125,6 +125,8 @@ discover_target_tools() {
   else
     local tool_paths=(
       "$HOME/.claude/skills"
+      "$HOME/.codebuddy/skills"
+      "$HOME/.workbuddy/skills"
       "$HOME/.config/opencode/skills"
       "$HOME/.cursor/skills"
       "$HOME/.openclaw/skills"
